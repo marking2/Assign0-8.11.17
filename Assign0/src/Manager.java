@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.time.*;
 
 public class Manager {
-
+//change
 	public static String fileName;
 	public Wifi newWifi = new Wifi();
 	public String formatLine = "TIME,ID,LAT,LON,ALT,Number Of Networks";
