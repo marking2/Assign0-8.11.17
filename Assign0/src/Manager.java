@@ -10,6 +10,7 @@ import java.time.*;
 
 public class Manager {
 //change
+	//other change of mark.
 	public static String fileName;
 	public Wifi newWifi = new Wifi();
 	public String formatLine = "TIME,ID,LAT,LON,ALT,Number Of Networks";
