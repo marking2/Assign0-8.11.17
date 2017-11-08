@@ -2,7 +2,7 @@
 public class FilterByID  implements Filter {
 	
 	//implemtaion
-	public void filter(Wifi[] wifiArr){ 
+	public void filter(Wifi[] wifiArr){ //need to write filterBySSID ? //Gal
 		Wifi temp = new Wifi();
 		int x;
 		for (int i = 1; i < wifiArr.length - 1; i++) {
@@ -15,5 +15,11 @@ public class FilterByID  implements Filter {
 				}
 			}
 		}
-	}	
+	}
+	public void filterByID(Wifi [] wifiArr){
+	}
+	
+	public void filterByGeo(Wifi [] wifiArr , String LAT , String LON , String ALT){
+		//Double.parseDouble()//Gal
+	}
 }
