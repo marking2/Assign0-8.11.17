@@ -1,4 +1,6 @@
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,9 +11,9 @@ import java.util.LinkedList;
 import java.time.*;
 
 public class Manager {
-//change
-	//other change of mark. mmm mm  ff
+
 	public static String fileName;
+	public static File folderName; // added by mark 7-11 18:15 
 	public Wifi newWifi = new Wifi();
 	public String formatLine = "TIME,ID,LAT,LON,ALT,Number Of Networks";
 	public String formatLineWifi = "SSID,MAC,Frequency,Signal";
@@ -22,15 +24,32 @@ public class Manager {
 	public Manager(String FN){
 		this.fileName = FN;
 	}
+	
+	public Manager(String SearchName, File Folder){ // added by mark 7-11 18:15 for folder 
+		this.fileName = SearchName;
+		this.folderName = Folder;
+	}
 
 	public static void main(String [] args){
+		/**
+		 * Mark's test code to read Full folder and find some specific file.txt (Wifi Scan)
+		 */
+		File f = new File("/home/recon/BACKUP");
+		Manager folderReader =new Manager(".txt",f);
+		folderReader.readByFolder();
+		
+
+		 
+		
+		
+		
 		/*
 		 * first step - txt to csv
 		 */
-		Manager m = new Manager("Assign0//WigleWifi_20171027162929.csv");
-		m.readFile(fileName);
+		//Manager m = new Manager("Assign0//WigleWifi_20171027162929.csv");
+		//m.readFile(fileName);
 		//		m.filter();
-		m.writeFile("/Users/marki/Desktop/WigleWifi_20171027162929_2.csv");
+	//	m.writeFile("/Users/marki/Desktop/WigleWifi_20171027162929_2.csv");
 		/*
 		 * second step - csv to kml(filter)
 		 */
@@ -48,9 +67,49 @@ public class Manager {
 		FilterByID FID = new FilterByID();
 		FID.filter(wifiArr);
 	}
+	
+	/*
+	 * // added by mark 7-11 18:15 
+	 * Reading the folder
+	 */
+	public void readByFolder(){
+		File[] list = folderName.listFiles();
+		FileReader fr;
+		BufferedReader br;
+		String[] compareIt = {"BSSID","LAT","LON","SSID"};
+		
+		try{
+			for (int i = 0; i < list.length; i++) {
+				if(list[i].getName().contains(fileName) && list[i].canRead()){
+					boolean Besure = false; // we are not sure yet, that this is the our Wifi info' file.
+					fr = new FileReader(list[i].getPath());
+					br = new BufferedReader(fr);
+					String str = br.readLine();
+					String[] tmp = str.split(",");
+					if(tmp[0]==compareIt[0] && tmp[1]==compareIt[1]&& tmp[2]==compareIt[2]&& tmp[3]==compareIt[3]) Besure = true;
+					if(Besure == true){
+						readFile(list[i].getPath()); //STOPED HERE. need to continue the Writing Step.
+						
+					}
+				}
+			}
+			
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		finally{
+			System.out.println(Arrays.toString(list) + "\n end of the Reading the following folders were readed.");
+		}
+	}
+	
 
 	/*
-	 * the function reads a file line by line, and constructs an array of Objects of type Wifi
+	 * the function reads a file line by line, and constructs an LinkeList of Objects of type Wifi
+	 * the methods that used: 
+	 * 	1. Read the line in to String 
+	 * 	2. repreduce that line as array of words (seperated by the ',' ) 
+	 * 	3. Create new Wifi object (constracture that get an array of strings )
+	 * 	4. add the new Wifi to the LinkedList<Wifi>
 	 */
 	public void readFile(String fileName)
 	{
@@ -59,7 +118,7 @@ public class Manager {
 			BufferedReader br=new BufferedReader(fr);
 			String str = br.readLine(); // first line is #Format
 			String [] s1 = str.split(",");
-			this.ID = s1[2].substring(6); 
+			this.ID = s1[2].substring(6); // The name of the Scanning Device. [Lenovo , Asus , Android etc..]
 			str = br.readLine(); // first line is #Format
 			s1 = str.split(","); // first place in the array is the format line - not interesting, throw
 			while((str = br.readLine())!= null){
