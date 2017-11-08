@@ -19,12 +19,22 @@ public class Manager {
 	public String formatLineWifi = "SSID,MAC,Frequency,Signal";
 	public Wifi[] wifiArr = new Wifi[12];
 	public String ID = "";
+	public ArrayList<String>  ArrCSVPaths  = new ArrayList<>();
 	public LinkedList<Wifi> WAL = new LinkedList<>();
 
-	public Manager(String FN){
+	/*/
+	 * 	public Manager(String FN){
 		this.fileName = FN;
+		readByFolder2();
 	}
-	
+	 */
+	public Manager(String FolderPath){
+		//		File folder = new File("/Users/gal/Desktop/TestMark")
+		File folder = new File(FolderPath);
+		readByFolder2(folder);
+	}
+
+
 	public Manager(String SearchName, File Folder){ // added by mark 7-11 18:15 for folder 
 		this.fileName = SearchName;
 		this.folderName = Folder;
@@ -34,14 +44,10 @@ public class Manager {
 		/**
 		 * Mark's test code to read Full folder and find some specific file.txt (Wifi Scan)
 		 */
-		File f = new File("/home/recon/BACKUP");
-		Manager folderReader =new Manager(".txt",f);
-		folderReader.readByFolder();
-		
-
-		 
-		
-		
+		//		File f = new File("//Users/gal/Desktop/TestMark");
+		//		Manager folderReader =new Manager(".csv",f);
+		//		folderReader.readByFolder2();
+		Manager m = new Manager ("/Users/gal/Desktop/TestMark");
 		
 		/*
 		 * first step - txt to csv
@@ -49,7 +55,7 @@ public class Manager {
 		//Manager m = new Manager("Assign0//WigleWifi_20171027162929.csv");
 		//m.readFile(fileName);
 		//		m.filter();
-	//	m.writeFile("/Users/marki/Desktop/WigleWifi_20171027162929_2.csv");
+		//	m.writeFile("/Users/marki/Desktop/WigleWifi_20171027162929_2.csv");
 		/*
 		 * second step - csv to kml(filter)
 		 */
@@ -67,19 +73,35 @@ public class Manager {
 		FilterByID FID = new FilterByID();
 		FID.filter(wifiArr);
 	}
-	
+
 	/*
 	 * // added by mark 7-11 18:15 
 	 * Reading the folder
 	 */
+
+	public static void listFilesForFolder(final File folder) {
+		for (final File fileEntry : folder.listFiles()) {
+			if (fileEntry.isDirectory()) {
+				listFilesForFolder(fileEntry);
+			} else {
+				if(fileEntry.getName().contains(".csv")){
+					System.out.println(fileEntry.getName());
+					String fName = fileEntry.getAbsolutePath();
+					//call function readFile(fName);
+				}
+			}
+		}
+	}
 	public void readByFolder(){
 		File[] list = folderName.listFiles();
+		//		File[] list = null ;
 		FileReader fr;
 		BufferedReader br;
 		String[] compareIt = {"BSSID","LAT","LON","SSID"};
-		
+
 		try{
 			for (int i = 0; i < list.length; i++) {
+
 				if(list[i].getName().contains(fileName) && list[i].canRead()){
 					boolean Besure = false; // we are not sure yet, that this is the our Wifi info' file.
 					fr = new FileReader(list[i].getPath());
@@ -88,12 +110,12 @@ public class Manager {
 					String[] tmp = str.split(",");
 					if(tmp[0]==compareIt[0] && tmp[1]==compareIt[1]&& tmp[2]==compareIt[2]&& tmp[3]==compareIt[3]) Besure = true;
 					if(Besure == true){
-						readFile(list[i].getPath()); //STOPED HERE. need to continue the Writing Step.
-						
+						//						readFile(list[i].getPath()); //STOPED HERE. need to continue the Writing Step.
+
 					}
 				}
 			}
-			
+
 		}catch(IOException e){
 			System.out.println(e);
 		}
@@ -101,8 +123,52 @@ public class Manager {
 			System.out.println(Arrays.toString(list) + "\n end of the Reading the following folders were readed.");
 		}
 	}
-	
 
+	public void readByFolder2(File FolderName){
+		File[] list = FolderName.listFiles();
+		System.out.println(Arrays.toString(list));
+		for (final File fileEntry : FolderName.listFiles()) {
+			if (fileEntry.isDirectory()) {
+				readByFolder2(fileEntry);
+			} 
+			else if(fileEntry.getName().contains(".csv")){
+				ArrCSVPaths.add(fileEntry.getAbsolutePath());
+//				System.out.println(fileEntry.getAbsolutePath());
+				CheckCSVFiles();
+			}
+		}
+	}
+	
+	public void CheckCSVFiles(){
+	
+		FileReader fr;
+		BufferedReader br;
+		String compareIt = "MAC,SSID,AuthMode,FirstSeen,Channel,RSSI,CurrentLatitude,CurrentLongitude,AltitudeMeters,AccuracyMeters,Type";
+	
+		try{
+			for (int i = 0; i < ArrCSVPaths.size(); i++) {
+					boolean Besure = true; // we are not sure yet, that this is the our Wifi info' file.
+					fr = new FileReader(ArrCSVPaths.get(i));
+					br = new BufferedReader(fr);//fix when the file is empty!!!
+					String str = br.readLine();
+					str = br.readLine();
+					String[] tmp = str.split(",");
+					if(!(str.equals(compareIt))) {
+						Besure = false;
+					}
+					if(Besure == false){
+						ArrCSVPaths.remove(i);//STOPED HERE. need to continue the Writing Step.
+				}
+			}
+
+		}catch(IOException e){
+			System.out.println(e);
+		}
+//		finally{
+//			System.out.println((ArrCSVPaths) + "\n end of the Reading the following folders were readed.");
+//		}
+		System.out.println(ArrCSVPaths.size());
+	}
 	/*
 	 * the function reads a file line by line, and constructs an LinkeList of Objects of type Wifi
 	 * the methods that used: 
@@ -111,6 +177,7 @@ public class Manager {
 	 * 	3. Create new Wifi object (constracture that get an array of strings )
 	 * 	4. add the new Wifi to the LinkedList<Wifi>
 	 */
+
 	public void readFile(String fileName)
 	{
 		try{
@@ -179,12 +246,13 @@ public class Manager {
 				}
 			}
 			outs.println();
+//			if(num == ArrCSVPaths.size()){
 			outs.close();
 			fw.close();
+//			}
 		}
 		catch(IOException ex){
 			System.out.println("error writing file\n" + ex);
 		}
 	}
 }
-
