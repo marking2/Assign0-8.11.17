@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.time.*;
-//changes
+
 public class Manager {
 
 	public static String fileName;
@@ -19,21 +19,12 @@ public class Manager {
 	public String formatLineWifi = "SSID,MAC,Frequency,Signal";
 	public Wifi[] wifiArr = new Wifi[12];
 	public String ID = "";
-	public ArrayList<String>  ArrCSVPaths  = new ArrayList<>();
+	public ArrayList<String> CsvList = new ArrayList<>();
 	public LinkedList<Wifi> WAL = new LinkedList<>();
 
-	/*/
-	 * 	public Manager(String FN){
+	public Manager(String FN){
 		this.fileName = FN;
-		readByFolder2();
 	}
-	 */
-	public Manager(String FolderPath){
-		//		File folder = new File("/Users/gal/Desktop/TestMark")
-		File folder = new File(FolderPath);
-		readByFolder2(folder);
-	}
-
 
 	public Manager(String SearchName, File Folder){ // added by mark 7-11 18:15 for folder 
 		this.fileName = SearchName;
@@ -44,11 +35,28 @@ public class Manager {
 		/**
 		 * Mark's test code to read Full folder and find some specific file.txt (Wifi Scan)
 		 */
-		//		File f = new File("//Users/gal/Desktop/TestMark");
-		//		Manager folderReader =new Manager(".csv",f);
-		//		folderReader.readByFolder2();
-		Manager m = new Manager ("/Users/gal/Desktop/TestMark");
-		
+
+		/*
+		File f = new File("/home/recon/BACKUP");
+		Manager folderReader =new Manager(".csv",f);
+		//folderReader.readByFolderRec(f);
+		folderReader.testFolderReading();
+		 */
+
+		/*
+		 * first step - txt to csv
+		 */
+		Manager m = new Manager("WigleWifi_20171027162929.csv");
+		m.readFile(fileName);
+		m.filter();
+
+		//Past your path here.		
+		m.writeFile("/home/recon/Documents/Academy/Year II/OOP/Work0/fileWriteTest/WigleWifi_20171027162929_2.csv");
+
+
+
+
+
 		/*
 		 * first step - txt to csv
 		 */
@@ -133,40 +141,40 @@ public class Manager {
 			} 
 			else if(fileEntry.getName().contains(".csv")){
 				ArrCSVPaths.add(fileEntry.getAbsolutePath());
-//				System.out.println(fileEntry.getAbsolutePath());
+				//				System.out.println(fileEntry.getAbsolutePath());
 				CheckCSVFiles();
 			}
 		}
 	}
-	
+
 	public void CheckCSVFiles(){
-	
+
 		FileReader fr;
 		BufferedReader br;
 		String compareIt = "MAC,SSID,AuthMode,FirstSeen,Channel,RSSI,CurrentLatitude,CurrentLongitude,AltitudeMeters,AccuracyMeters,Type";
-	
+
 		try{
 			for (int i = 0; i < ArrCSVPaths.size(); i++) {
-					boolean Besure = true; // we are not sure yet, that this is the our Wifi info' file.
-					fr = new FileReader(ArrCSVPaths.get(i));
-					br = new BufferedReader(fr);//fix when the file is empty!!!
-					String str = br.readLine();
-					str = br.readLine();
-					String[] tmp = str.split(",");
-					if(!(str.equals(compareIt))) {
-						Besure = false;
-					}
-					if(Besure == false){
-						ArrCSVPaths.remove(i);//STOPED HERE. need to continue the Writing Step.
+				boolean Besure = true; // we are not sure yet, that this is the our Wifi info' file.
+				fr = new FileReader(ArrCSVPaths.get(i));
+				br = new BufferedReader(fr);//fix when the file is empty!!!
+				String str = br.readLine();
+				str = br.readLine();
+				String[] tmp = str.split(",");
+				if(!(str.equals(compareIt))) {
+					Besure = false;
+				}
+				if(Besure == false){
+					ArrCSVPaths.remove(i);//STOPED HERE. need to continue the Writing Step.
 				}
 			}
 
 		}catch(IOException e){
 			System.out.println(e);
 		}
-//		finally{
-//			System.out.println((ArrCSVPaths) + "\n end of the Reading the following folders were readed.");
-//		}
+		//		finally{
+		//			System.out.println((ArrCSVPaths) + "\n end of the Reading the following folders were readed.");
+		//		}
 		System.out.println(ArrCSVPaths.size());
 	}
 	/*
@@ -246,13 +254,14 @@ public class Manager {
 				}
 			}
 			outs.println();
-//			if(num == ArrCSVPaths.size()){
+			//			if(num == ArrCSVPaths.size()){
 			outs.close();
 			fw.close();
-//			}
+			//			}
 		}
 		catch(IOException ex){
 			System.out.println("error writing file\n" + ex);
 		}
 	}
 }
+
